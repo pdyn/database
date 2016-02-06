@@ -32,14 +32,14 @@ class DbUtils {
 	 * Will generate a text identifier from the string (lowercase, alphanum-only), search for the value in the given table/column,
 	 * and keep incrementing a suffixed counter until the value is unique.
 	 *
+	 * @param \pdyn\database\DbDriverInterface $DB An active database connection.
 	 * @param string $input Any input text.
 	 * @param string $table The table in which to ensure uniqueness.
 	 * @param string $field The column in which to ensure uniqueness.
 	 * @param array $restriction_list Array of values the text-identifier cannot match.
 	 * @return string The generated, unique text identifier.
 	 */
-	public static function generate_slug($input, $table, $field, array $restriction_list=array()) {
-		global $DB;
+	public static function generate_slug(\pdyn\database\DbDriverInterface $DB, $input, $table, $field, array $restriction_list = array()) {
 		$i = 0;
 		while (true) {
 			$slug = \pdyn\datatype\Text::make_slug($input);

@@ -25,10 +25,9 @@ namespace pdyn\database\pdo\mysql\tests;
 /**
  * Test the PDO-MySQL DbDriver's structure manager.
  *
- * @group atlas
- * @group atlas_db
- * @group atlas_db_pdo
- * @group atlas_db_pdo_mysql
+ * @group pdyn
+ * @group pdyn_database
+ * @group pdyn_database_mysql
  */
 class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTestAbstract {
 	/**
@@ -37,14 +36,14 @@ class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTest
 	 * @return \pdyn\database\pdo\mysql\DbDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		global $CFG;
-		if ($CFG->db_driver !== 'mysql') {
+		$mysqlenabled = (defined('PDYN_DATABASE_TESTMYSQL') && PDYN_DATABASE_TESTMYSQL === true) ? true : false;
+		if ($mysqlenabled !== true) {
 			$this->markTestSkipped('Not using MySQL driver');
 			return false;
 		}
-		$DB = new \pdyn\database\pdo\mysql\DbDriver('\pdyn\database\tests\lib\DbTestSchema');
-		$dsn = 'mysql:host='.$CFG->db_host.';dbname='.$CFG->db_database;
-		$DB->connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$DB = new MockDriver('\pdyn\database\tests\lib\DbTestSchema');
+		$dsn = 'mysql:host='.PDYN_DATABASE_HOST.';dbname='.PDYN_DATABASE_DATABASE;
+		$DB->connect($dsn, PDYN_DATABASE_USER, PDYN_DATABASE_PASSWORD);
 		$DB->set_prefix(static::DBPREFIX);
 		return $DB;
 	}

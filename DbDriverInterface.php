@@ -122,21 +122,6 @@ interface DbDriverInterface {
 	public function get_prefix();
 
 	/**
-	 * Sets the database version.
-	 *
-	 * @param string $version The version to set.
-	 * @return bool Success/Failure.
-	 */
-	public function set_db_ver($version);
-
-	/**
-	 * Gets the current database version.
-	 *
-	 * @return string|bool The current database version, or false if failure.
-	 */
-	public function get_db_ver();
-
-	/**
 	 * Transform a value into a storage representation. Optionally based on table/column schema.
 	 *
 	 * @param mixed $val A value to transform.

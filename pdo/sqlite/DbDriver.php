@@ -53,7 +53,7 @@ class DbDriver extends \pdyn\database\pdo\DbDriver {
 	public function get_tables($schema = true) {
 		if ($schema === false) {
 			$tables_raw = $this->get_recordset_sql('SELECT * FROM sqlite_master WHERE type="table"');
-			$tables = array();
+			$tables = [];
 			foreach ($tables_raw as $row) {
 				$table = $row['name'];
 				if (mb_strpos($table, $this->prefix) === 0) {
@@ -72,68 +72,68 @@ class DbDriver extends \pdyn\database\pdo\DbDriver {
 	 * @return array Array of datatypes.
 	 */
 	public static function internal_datatypes() {
-		return array(
-			'email' => array(
+		return [
+			'email' => [
 				'vfunc' => '\pdyn\datatype\Validator::email',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
-			),
-			'timestamp' => array(
+			],
+			'timestamp' => [
 				'vfunc' => '\pdyn\datatype\Validator::timestamp',
 				'sql_datatype' => 'INTEGER NOT NULL DEFAULT \'0\''
-			),
-			'str' => array(
+			],
+			'str' => [
 				'vfunc' => '\pdyn\datatype\Validator::stringlike',
 				'sql_datatype' => 'VARCHAR(255) NOT NULL DEFAULT \'\'',
-			),
-			'smallstr' => array(
+			],
+			'smallstr' => [
 				'vfunc' => '\pdyn\datatype\Validator::stringlike',
 				'sql_datatype' => 'VARCHAR(255) NOT NULL DEFAULT \'\''
-			),
-			'text' => array(
+			],
+			'text' => [
 				'vfunc' => '\pdyn\datatype\Validator::stringlike',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
-			),
-			'longtext' => array(
+			],
+			'longtext' => [
 				'vfunc' => '\pdyn\datatype\Validator::stringlike',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
-			),
-			'filename' => array(
+			],
+			'filename' => [
 				'vfunc' => '\pdyn\datatype\Validator::filename',
 				'sql_datatype' => 'VARCHAR(255) NOT NULL DEFAULT \'\''
-			),
-			'int' => array(
+			],
+			'int' => [
 				'vfunc' => '\pdyn\datatype\Validator::intlike',
 				'sql_datatype' => 'INTEGER NOT NULL DEFAULT \'0\''
-			),
-			'bigint' => array(
+			],
+			'bigint' => [
 				'vfunc' => '\pdyn\datatype\Validator::intlike',
 				'sql_datatype' => 'BIGINT NOT NULL DEFAULT \'0\''
-			),
-			'float' => array(
+			],
+			'float' => [
 				'vfunc' => '\pdyn\datatype\Validator::float',
 				'sql_datatype' => ''
-			),
-			'id' => array(
+			],
+			'id' => [
 				'vfunc' => '\pdyn\datatype\Id::validate',
 				'sql_datatype' => 'INTEGER NOT NULL DEFAULT \'0\''
-			),
-			'bool' => array(
+			],
+			'bool' => [
 				'vfunc' => '\pdyn\datatype\Validator::boollike',
 				'sql_datatype' => 'TINYINT(1) NOT NULL DEFAULT \'0\''
-			),
-			'user_id' => array(
+			],
+			'user_id' => [
 				'vfunc' => '\pdyn\datatype\Id::validate',
 				'sql_datatype' => 'INTEGER NOT NULL DEFAULT \'0\''
-			),
-			'url' => array(
+			],
+			'url' => [
 				'vfunc' => '\pdyn\datatype\Url::validate',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
-			),
-			'mime' => array(
+			],
+			'mime' => [
 				'vfunc' => '\pdyn\datatype\Validator::mime',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
-			),
-		);
+			],
+		];
 	}
 
 	/**

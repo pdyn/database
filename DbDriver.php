@@ -38,7 +38,7 @@ abstract class DbDriver implements DbDriverInterface {
 	protected $schemaclass = '';
 
 	/** @var string A prefix to add to all tables. */
-	protected $prefix = 'atlas_';
+	protected $prefix = 'pdyn_';
 
 	/** @var \Psr\Log\LoggerInterface A logging object to log to (if set). */
 	protected $logger = null;
@@ -150,7 +150,7 @@ abstract class DbDriver implements DbDriverInterface {
 		if (is_bool($val)) {
 			$val = (int)$val;
 		} elseif (is_array($val)) {
-			$val = \atlas\utf8safe_serialize($val);
+			$val = \pdyn\datatype\Text::utf8safe_serialize($val);
 		} elseif (!is_scalar($val)) {
 			$val = '';
 		}
@@ -271,7 +271,7 @@ abstract class DbDriver implements DbDriverInterface {
 			$args = func_get_args();
 			$class = get_called_class();
 			$DB = new $class('db_schema');
-			$callable = array($DB, 'connect');
+			$callable = [$DB, 'connect'];
 			call_user_func_array($callable, $args);
 		} catch (\Exception $e) {
 			return false;
@@ -320,33 +320,6 @@ abstract class DbDriver implements DbDriverInterface {
 	}
 
 	/**
-	 * Sets the database version.
-	 *
-	 * @param string $version The version to set.
-	 * @return bool Success/Failure.
-	 */
-	public function set_db_ver($version) {
-		global $CFG;
-		if (!empty($version) && (is_string($version) || is_numeric($version))) {
-			$version = preg_replace('#[^A-Za-z0-9-_\.]#', '', $version);
-			$CFG->set('core', 'db_version', $version);
-			return true;
-		} else {
-			return false;
-		}
-	}
-
-	/**
-	 * Gets the current database version.
-	 *
-	 * @return string|bool The current database version, or false if failure.
-	 */
-	public function get_db_ver() {
-		global $CFG;
-		return $CFG->get('core', 'db_version', false);
-	}
-
-	/**
 	 * Get a list of tables in the database.
 	 *
 	 * @param bool $schema Whether to use the supplied schema (if true), or whether to query the database (if false)
@@ -356,7 +329,7 @@ abstract class DbDriver implements DbDriverInterface {
 		if ($schema === false) {
 			$this->query('SHOW TABLES');
 			$tables_raw = $this->fetch_arrayset();
-			$tables = array();
+			$tables = [];
 			foreach ($tables_raw as $row) {
 				$table = current($row);
 				if (mb_strpos($table, $this->prefix) === 0) {
@@ -367,7 +340,7 @@ abstract class DbDriver implements DbDriverInterface {
 		} else {
 			$schema = new \ReflectionClass($this->schemaclass);
 			$methods = $schema->getMethods(\ReflectionMethod::IS_STATIC);
-			$tables = array();
+			$tables = [];
 			foreach ($methods as $method) {
 				if ($method->name{0} !== '_' && $method->name !== 'get_all') {
 					$tables[] = $method->name;
@@ -493,7 +466,7 @@ abstract class DbDriver implements DbDriverInterface {
 	 */
 	public function get_record($table, array $conditions = array(), array $order = array(), $columns = '*') {
 		list($sql, $params) = $this->generate_select_sql($table, $columns, $conditions, $order, 0, 1);
-		return $this->get_records_sql($sql, $params, array(), static::DB_RETURN_ARRAY);
+		return $this->get_records_sql($sql, $params, [], static::DB_RETURN_ARRAY);
 	}
 
 	/**
@@ -522,7 +495,7 @@ abstract class DbDriver implements DbDriverInterface {
 		// Record limiting.
 		$sql .= $this->generate_limit_clause(0, 1);
 
-		return $this->get_records_sql($sql, $params, array(), static::DB_RETURN_ARRAY);
+		return $this->get_records_sql($sql, $params, [], static::DB_RETURN_ARRAY);
 	}
 
 	/**
@@ -639,7 +612,7 @@ abstract class DbDriver implements DbDriverInterface {
 
 			case self::DB_RETURN_ARRAYSET:
 				$data = $this->fetch_arrayset($returnmode, $returnmodeval);
-				return (!empty($data)) ? $data : array();
+				return (!empty($data)) ? $data : [];
 
 			case self::DB_RETURN_RECORDSET:
 				return $this->fetch_recordset();
@@ -659,7 +632,7 @@ abstract class DbDriver implements DbDriverInterface {
 	 */
 	public function get_recordset($table, array $conditions = array(), array $order = array(), $columns = '*', $start = 0, $count = null) {
 		list($sql, $params) = $this->generate_select_sql($table, $columns, $conditions, $order, $start, $count);
-		return $this->get_records_sql($sql, $params, array(), static::DB_RETURN_RECORDSET);
+		return $this->get_records_sql($sql, $params, [], static::DB_RETURN_RECORDSET);
 	}
 
 	/**
@@ -695,7 +668,7 @@ abstract class DbDriver implements DbDriverInterface {
 		// Record limiting.
 		$sql .= $this->generate_limit_clause($start, $count);
 
-		return $this->get_records_sql($sql, $params, array(), static::DB_RETURN_RECORDSET);
+		return $this->get_records_sql($sql, $params, [], static::DB_RETURN_RECORDSET);
 	}
 
 	/**
@@ -706,7 +679,7 @@ abstract class DbDriver implements DbDriverInterface {
 	 * @return \pdyn\database\DbRecordset A recordset of returned rows.
 	 */
 	public function get_recordset_sql($sql, array $params = array()) {
-		return $this->get_records_sql($sql, $params, array(), self::DB_RETURN_RECORDSET);
+		return $this->get_records_sql($sql, $params, [], self::DB_RETURN_RECORDSET);
 	}
 
 	/**
@@ -718,7 +691,7 @@ abstract class DbDriver implements DbDriverInterface {
 	 */
 	public function count_records($table, array $conditions = array()) {
 		$sql = 'SELECT count(1) as count FROM {'.$table.'}';
-		$params = array();
+		$params = [];
 
 		if (!empty($conditions)) {
 			list($where, $params) = $this->sql_from_filters($table, $conditions);
@@ -767,8 +740,8 @@ abstract class DbDriver implements DbDriverInterface {
 			$this->validate_columns($table, $record);
 		}
 
-		$columns = array();
-		$params = array();
+		$columns = [];
+		$params = [];
 		foreach ($record as $column => $value) {
 			$columns[] = $this->quote_column($column);
 			$params[] = $this->cast_val($value, $table, $column);
@@ -803,8 +776,8 @@ abstract class DbDriver implements DbDriverInterface {
 
 		$rowplaceholders = '('.implode(',', array_fill(0, $numcolumns, '?')).')';
 
-		$rowsplaceholders = array();
-		$params = array();
+		$rowsplaceholders = [];
+		$params = [];
 		foreach ($rows as $i => $row) {
 
 			// Skip over incomplete or too large rows.
@@ -862,9 +835,9 @@ abstract class DbDriver implements DbDriverInterface {
 	public function update_records($table, array $toupdate, array $conditions = array()) {
 		if (!empty($toupdate)) {
 			$where = '';
-			$params = array();
+			$params = [];
 
-			$updatedata = array();
+			$updatedata = [];
 			$this->validate_columns($table, $toupdate);
 			foreach ($toupdate as $column => $value) {
 				$updatedata[] = $this->quote_column($column).' = ?';
@@ -899,9 +872,9 @@ abstract class DbDriver implements DbDriverInterface {
 	public function update_records_select($table, $select, $selectparams, array $updated) {
 		if (!empty($updated)) {
 			$where = '';
-			$params = array();
+			$params = [];
 
-			$updatedata = array();
+			$updatedata = [];
 			$this->validate_columns($table, $updated);
 			foreach ($updated as $column => $value) {
 				$updatedata[] = $this->quote_column($column).' = ?';
@@ -975,7 +948,7 @@ abstract class DbDriver implements DbDriverInterface {
 	 * @return array Arrayset of results.
 	 */
 	public function fetch_arrayset($sortmode = 'normal', $sortparam = '') {
-		$arrayset = array();
+		$arrayset = [];
 		while ($row = $this->fetch_row()) {
 			switch ($sortmode) {
 				case 'normal':
@@ -1019,7 +992,7 @@ abstract class DbDriver implements DbDriverInterface {
 		}
 
 		$sql = 'SELECT '.$columns.' FROM {'.$table.'} '.str_replace(':', '_', $table).' ';
-		$params = array();
+		$params = [];
 
 		if (!empty($conditions)) {
 			list($wheresql, $params) = $this->sql_from_filters($table, $conditions);
@@ -1047,7 +1020,7 @@ abstract class DbDriver implements DbDriverInterface {
 	public function generate_order_clause(array $order) {
 		// Sorting.
 		if (!empty($order) && is_array($order)) {
-			$orderby = array();
+			$orderby = [];
 			foreach ($order as $field => $dir) {
 				if (is_numeric($field)) {
 					// If we have an auto-assigned it, it's a manual sort entry. Add the value.
@@ -1115,8 +1088,8 @@ abstract class DbDriver implements DbDriverInterface {
 	 * @return array Array of SQL WHERE fragment (without WHERE string) and array of parameters.
 	 */
 	public function sql_from_filters($table, $filters) {
-		$where = array();
-		$params = array();
+		$where = [];
+		$params = [];
 		$schema = $this->get_table_schema($table);
 
 		foreach ($filters as $key => $val) {
@@ -1145,7 +1118,7 @@ abstract class DbDriver implements DbDriverInterface {
 					throw new Exception('Empty values received for db filter', static::ERR_DB_BAD_REQUEST);
 				}
 
-				$this_data_dbparams = array();
+				$this_data_dbparams = [];
 
 				foreach ($filter->data as $val) {
 					if ($this->validate_value($filter->datatype, $val) !== true) {
@@ -1289,7 +1262,7 @@ abstract class DbDriver implements DbDriverInterface {
 	protected function log_explain($sql, $params) {
 		if (mb_strpos($sql, 'EXPLAIN') !== 0 && mb_strpos($sql, 'SELECT') === 0 && !empty($this->logger)) {
 			$sqlexp = 'EXPLAIN '.$sql;
-			$info = array();
+			$info = [];
 			$this->query($sqlexp, $params);
 			$info = $this->fetch_array();
 			$out = htmlentities($sqlexp).'<br /><table>';

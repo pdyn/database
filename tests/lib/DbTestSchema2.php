@@ -38,60 +38,48 @@ class DbTestSchema2 {
 		throw new Exception($name.' is not defined in database schema.', Exception::ERR_INTERNAL_ERROR);
 	}
 
-	public static function testtable($columns=true, $keys=false) {
-		$ret = array();
-		if ($columns === true) {
-			$ret['columns'] = array(
+	public static function testtable() {
+		return [
+			'columns' => [
 				'id' => 'id',
 				'value' => 'text',
 				'newcol1' => 'int',
 				'col2' => 'text',
 				'col3' => 'int',
-			);
-		}
-		if ($keys === true) {
-			$ret['keys'] = array(
-				'PRIMARY' => array('id', true),
-			);
-		}
-		return $ret;
+			],
+			'keys' => [
+				'PRIMARY' => ['id', true],
+			],
+		];
 	}
 
-	public static function simplekv($columns=true, $keys=false) {
-		$ret = array();
-		if ($columns === true) {
-			$ret['columns'] = array(
+	public static function simplekv() {
+		return [
+			'columns' => [
 				'id' => 'id',
 				'key' => 'str',
 				'value' => 'text',
-			);
-		}
-		if ($keys === true) {
-			$ret['keys'] = array(
-				'PRIMARY' => array('id', true),
-				'key' => array('key', false),
-			);
-		}
-		return $ret;
+			],
+			'keys' => [
+				'PRIMARY' => ['id', true],
+				'key' => ['key', false],
+			],
+		];
 	}
 
 	public static function config() {
-		$ret = [];
-		if ($columns === true) {
-			$ret['columns'] = [
+		return [
+			'columns' => [
 				'id' => 'id',
 				'component' => 'str',
 				'name' => 'str',
 				'val' => 'longtext',
-			];
-		}
-		if ($keys === true) {
-			$ret['keys'] = [
+			],
+			'keys' => [
 				'PRIMARY' => ['id', true],
 				'component' => ['component', false],
 				'componentkey' => ['component,name', true],
-			];
-		}
-		return $ret;
+			],
+		];
 	}
 }

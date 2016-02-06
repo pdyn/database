@@ -72,7 +72,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		$schema = $schema[$table];
 
 		// Generate column SQL.
-		$columns = array();
+		$columns = [];
 		if (!empty($schema['columns'])) {
 			foreach ($schema['columns'] as $fieldname => $datatype) {
 				$is_primary_key = ($schema['keys']['PRIMARY'][0] === $fieldname) ? true : false;
@@ -95,7 +95,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		$this->dbdriver->query($sql);
 
 		// Create indexes.
-		$indexes = array();
+		$indexes = [];
 		if (!empty($schema['keys'])) {
 			foreach ($schema['keys'] as $keyname => $key_info) {
 				if ($keyname === 'PRIMARY') {
@@ -142,8 +142,8 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 
 		// Get current state + modify selected column.
 		$curtablestate = $this->dbdriver->get_recordset_sql('PRAGMA table_info({'.$tmptablename.'})');
-		$newtablecols = array();
-		$newtablekeys = array();
+		$newtablecols = [];
+		$newtablekeys = [];
 		foreach ($curtablestate as $curcol) {
 			$name = ($curcol['name'] === $oldname) ? $column : $curcol['name'];
 			$curcol['name'] = $name;
@@ -217,7 +217,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 	 * @param array $keys Array of table keys.
 	 */
 	protected function create_table_raw($table, array $columns, array $keys = array()) {
-		$colentries = array();
+		$colentries = [];
 		foreach ($columns as $name => $columninfo) {
 			$colentry = $columninfo['name'].' '.$columninfo['type'];
 			if (isset($columninfo['notnull']) && $columninfo['notnull'] === '1') {
@@ -252,8 +252,8 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 
 		// Get current state + modify selected column.
 		$curtablestate = $this->dbdriver->get_recordset_sql('PRAGMA table_info({'.$tmptablename.'})');
-		$newtablecols = array();
-		$newtablekeys = array();
+		$newtablecols = [];
+		$newtablekeys = [];
 		foreach ($curtablestate as $curcol) {
 			$newtablecols[$curcol['name']] = $curcol;
 			if ($curcol['name'] === $column) {
@@ -287,8 +287,8 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 
 		// Get current table state + remove column.
 		$curtablestate = $this->dbdriver->get_recordset_sql('PRAGMA table_info({'.$tmptablename.'})');
-		$newtablecols = array();
-		$newtablekeys = array();
+		$newtablecols = [];
+		$newtablekeys = [];
 		foreach ($curtablestate as $curcol) {
 			if ($curcol['name'] !== $column) {
 				$newtablecols[$curcol['name']] = $curcol;

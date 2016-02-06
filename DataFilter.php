@@ -29,7 +29,7 @@ namespace pdyn\database;
  */
 class DataFilter {
 	/** @var array An array of valid comparison operators. */
-	protected $valid_comp_op = array('=', '<', '>', '<=', '>=', '!=');
+	protected $valid_comp_op = ['=', '<', '>', '<=', '>=', '!='];
 
 	/** @var array An array representation of the filter. */
 	protected $val;

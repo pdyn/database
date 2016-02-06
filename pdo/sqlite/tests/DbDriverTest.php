@@ -32,10 +32,9 @@ class MockDriver extends \pdyn\database\pdo\sqlite\DbDriver {
 /**
  * Test the SQLite DbDriver.
  *
- * @group atlas
- * @group atlas_db
- * @group atlas_db_pdo
- * @group atlas_db_pdo_sqlite
+ * @group pdyn
+ * @group pdyn_database
+ * @group pdyn_database_sqlite
  */
 class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	/**
@@ -44,10 +43,9 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * @return \pdyn\database\pdo\sqlite\tests\MockDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		global $CFG;
 		$DB = new MockDriver('\pdyn\database\tests\lib\DbTestSchema');
 		$dsn = 'sqlite::memory:';
-		$DB->connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$DB->connect($dsn);
 		$DB->set_prefix(static::DBPREFIX);
 		return $DB;
 	}
@@ -56,7 +54,6 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * Test connect and disconnect methods.
 	 */
 	public function test_connect() {
-		global $CFG;
 		$DB = $this->construct_driver();
 		$this->assertTrue($DB->connected);
 
@@ -68,9 +65,8 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * Test testConnect method.
 	 */
 	public function test_testConnect() {
-		global $CFG;
 		$dsn = 'sqlite::memory:';
-		$result = MockDriver::test_connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$result = MockDriver::test_connect($dsn);
 		$this->assertTrue($result);
 	}
 }

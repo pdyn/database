@@ -25,9 +25,9 @@ namespace pdyn\database\pdo\sqlite\tests;
 /**
  * Test the SQLite DbDriver's structure manager.
  *
- * @group atlas_db
- * @group atlas_db_pdo
- * @group atlas_db_pdo_sqlite
+ * @group pdyn
+ * @group pdyn_database
+ * @group pdyn_database_sqlite
  */
 class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTestAbstract {
 	/**
@@ -36,10 +36,9 @@ class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTest
 	 * @return \pdyn\database\pdo\sqlite\DbDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		global $CFG;
 		$DB = new \pdyn\database\pdo\sqlite\DbDriver('\pdyn\database\tests\lib\DbTestSchema');
 		$dsn = 'sqlite::memory:';
-		$DB->connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$DB->connect($dsn);
 		$DB->set_prefix(static::DBPREFIX);
 		return $DB;
 	}

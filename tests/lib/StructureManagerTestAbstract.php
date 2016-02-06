@@ -27,9 +27,9 @@ use \pdyn\base\Exception;
 /**
  * Tests a DbDriver's StructureManagerInterface implementation.
  */
-abstract class StructureManagerTestAbstract extends \atlas\tests\BasicTestcase {
+abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase {
 	/** The prefix to use for any created database tables. */
-	const DBPREFIX = 'atlasphpunitdbtest_';
+	const DBPREFIX = 'pdyndatabasetest_';
 
 	/**
 	 * Construct the database driver.
@@ -42,8 +42,13 @@ abstract class StructureManagerTestAbstract extends \atlas\tests\BasicTestcase {
 	 * Run the test (wrapper around phpunit function)
 	 */
 	public function runBare() {
-		global $DB;
-		$DB2 = clone $DB;
+		if (file_exists(__DIR__.'/../../phpunit_config.php')) {
+			require_once(__DIR__.'/../../phpunit_config.php');
+		}
+
+		if (!empty($DB)) {
+			$DB2 = clone $DB;
+		}
 		$DB = $this->construct_driver();
 		$this->DB = $DB;
 
@@ -53,12 +58,16 @@ abstract class StructureManagerTestAbstract extends \atlas\tests\BasicTestcase {
 			parent::runBare();
 		} catch (\Exception $e) {
 			$this->clean_database();
-			$DB = clone $DB2;
+			if (!empty($DB2)) {
+				$DB = clone $DB2;
+			}
 			throw $e;
 		}
 
 		$this->clean_database();
-		$DB = clone $DB2;
+		if (!empty($DB2)) {
+			$DB = clone $DB2;
+		}
 	}
 
 	/**

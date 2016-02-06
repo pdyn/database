@@ -73,7 +73,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		$schema = $schema[$table];
 
 		// Generate column SQL.
-		$columns = array();
+		$columns = [];
 		if (!empty($schema['columns'])) {
 			foreach ($schema['columns'] as $fieldname => $datatype) {
 				$column = $this->dbdriver->quote_column($fieldname).' ';
@@ -87,7 +87,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		}
 
 		// Generate key SQL.
-		$keys = array();
+		$keys = [];
 		if (!empty($schema['keys'])) {
 			foreach ($schema['keys'] as $keyname => $key_info) {
 

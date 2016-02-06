@@ -32,10 +32,9 @@ class MockDriver extends \pdyn\database\pdo\mysql\DbDriver {
 /**
  * Test the PDO-MySQL DbDriver.
  *
- * @group atlas
- * @group atlas_db
- * @group atlas_db_pdo
- * @group atlas_db_pdo_mysql
+ * @group pdyn
+ * @group pdyn_database
+ * @group pdyn_database_mysql
  */
 class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	/**
@@ -44,14 +43,14 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * @return \pdyn\database\pdo\mysql\tests\MockDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		global $CFG;
-		if ($CFG->db_driver !== 'mysql') {
+		$mysqlenabled = (defined('PDYN_DATABASE_TESTMYSQL') && PDYN_DATABASE_TESTMYSQL === true) ? true : false;
+		if ($mysqlenabled !== true) {
 			$this->markTestSkipped('Not using MySQL driver');
 			return false;
 		}
 		$DB = new MockDriver('\pdyn\database\tests\lib\DbTestSchema');
-		$dsn = 'mysql:host='.$CFG->db_host.';dbname='.$CFG->db_database;
-		$DB->connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$dsn = 'mysql:host='.PDYN_DATABASE_HOST.';dbname='.PDYN_DATABASE_DATABASE;
+		$DB->connect($dsn, PDYN_DATABASE_USER, PDYN_DATABASE_PASSWORD);
 		$DB->set_prefix(static::DBPREFIX);
 		return $DB;
 	}
@@ -60,7 +59,6 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * Test connect and disconnect methods.
 	 */
 	public function test_connect() {
-		global $CFG;
 		$DB = $this->construct_driver();
 		$this->assertTrue($DB->connected);
 
@@ -72,9 +70,8 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * Test testConnect method.
 	 */
 	public function test_testConnect() {
-		global $CFG;
-		$dsn = 'mysql:host='.$CFG->db_host.';dbname='.$CFG->db_database;
-		$result = MockDriver::test_connect($dsn, $CFG->db_user, $CFG->db_pass);
+		$dsn = 'mysql:host='.PDYN_DATABASE_HOST.';dbname='.PDYN_DATABASE_DATABASE;
+		$result = MockDriver::test_connect($dsn, PDYN_DATABASE_USER, PDYN_DATABASE_PASSWORD);
 		$this->assertTrue($result);
 	}
 }
