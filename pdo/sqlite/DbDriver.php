@@ -133,6 +133,14 @@ class DbDriver extends \pdyn\database\pdo\DbDriver {
 				'vfunc' => '\pdyn\datatype\Validator::mime',
 				'sql_datatype' => 'TEXT NOT NULL DEFAULT \'\''
 			],
+			'blob' => [
+				'vfunc' => null,
+				'sql_datatype' => 'BLOB NOT NULL',
+			],
+			'mediumblob' => [
+				'vfunc' => null,
+				'sql_datatype' => 'MEDIUMBLOB NOT NULL',
+			],
 		];
 	}
 
