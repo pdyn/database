@@ -26,6 +26,8 @@ use \pdyn\base\Exception;
 
 /**
  * An abstract test framework to test database drivers.
+ *
+ * @codeCoverageIgnore
  */
 abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 	/** The prefix to use for tables created during the test. */

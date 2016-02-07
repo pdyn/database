@@ -35,6 +35,7 @@ class MockDriver extends \pdyn\database\pdo\mysql\DbDriver {
  * @group pdyn
  * @group pdyn_database
  * @group pdyn_database_mysql
+ * @codeCoverageIgnore
  */
 class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	/**

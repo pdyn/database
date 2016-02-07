@@ -26,6 +26,8 @@ use \pdyn\base\Exception;
 
 /**
  * A test database schema.
+ *
+ * @codeCoverageIgnore
  */
 class DbTestSchema {
 	/**

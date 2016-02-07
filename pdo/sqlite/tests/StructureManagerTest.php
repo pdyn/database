@@ -28,6 +28,7 @@ namespace pdyn\database\pdo\sqlite\tests;
  * @group pdyn
  * @group pdyn_database
  * @group pdyn_database_sqlite
+ * @codeCoverageIgnore
  */
 class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTestAbstract {
 	/**

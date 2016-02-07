@@ -26,6 +26,8 @@ use \pdyn\base\Exception;
 
 /**
  * Tests a DbDriver's StructureManagerInterface implementation.
+ *
+ * @codeCoverageIgnore
  */
 abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase {
 	/** The prefix to use for any created database tables. */
