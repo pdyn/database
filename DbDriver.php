@@ -35,7 +35,7 @@ abstract class DbDriver implements DbDriverInterface {
 	public $connected = false;
 
 	/** @var string The classname of the database schema to use. */
-	protected $schemaclass = '';
+	protected $schemaclass = null;
 
 	/** @var string A prefix to add to all tables. */
 	protected $prefix = 'pdyn_';
@@ -69,11 +69,9 @@ abstract class DbDriver implements DbDriverInterface {
 	 *
 	 * @param string $schema The fully-qualified classname of a database schema class.
 	 */
-	public function __construct($schema) {
-		$this->schemaclass = $schema;
-
-		if (!empty($logger)) {
-			$this->logger = $logger;
+	public function __construct($schema = null) {
+		if (!empty($schema)) {
+			$this->schemaclass = $schema;
 		}
 
 		static::$instance =& $this;
@@ -138,14 +136,26 @@ abstract class DbDriver implements DbDriverInterface {
 	abstract public function structure();
 
 	/**
-	 * Transform a value into a storage representation. Optionally based on table/column schema.
+	 * Transform a value into a storage representation based on it's table and column.
 	 *
 	 * @param mixed $val A value to transform.
 	 * @param string $table A table to look up to transform against schema.
 	 * @param string $column A column to look up to transform against schema.
 	 * @return string|int|float The transformed value.
 	 */
-	public function cast_val($val, $table = '', $column = '') {
+	public function cast_val_for_column($value, $table, $column) {
+		$datatype = $this->get_column_datatype($table, $column);
+		return $this->cast_val($value, $datatype);
+	}
+
+	/**
+	 * Transform a value into a storable representation.
+	 *
+	 * @param mixed $val A value to transform.
+	 * @param string $datatype The datatype of the value.
+	 * @return string|int|float The transformed value.
+	 */
+	public function cast_val($val, $datatype) {
 		// Translate non-storable values.
 		if (is_bool($val)) {
 			$val = (int)$val;
@@ -156,25 +166,22 @@ abstract class DbDriver implements DbDriverInterface {
 		}
 
 		// Cast for column type (if possible).
-		if (!empty($table) && !empty($column)) {
-			$datatype = $this->get_column_datatype($table, $column);
-			switch ($datatype) {
-				case 'timestamp':
-				case 'int':
-				case 'bigint':
-				case 'id':
-				case 'bool':
-				case 'user_id':
-					$val = (int)$val;
-					break;
+		switch ($datatype) {
+			case 'timestamp':
+			case 'int':
+			case 'bigint':
+			case 'id':
+			case 'bool':
+			case 'user_id':
+				$val = (int)$val;
+				break;
 
-				case 'float':
-					$val = (float)$val;
-					break;
+			case 'float':
+				$val = (float)$val;
+				break;
 
-				default:
-					$val = (string)$val;
-			}
+			default:
+				$val = (string)$val;
 		}
 		return $val;
 	}
@@ -340,6 +347,9 @@ abstract class DbDriver implements DbDriverInterface {
 			}
 			return $tables;
 		} else {
+			if (empty($this->schemaclass)) {
+				throw new \Exception('No schema set');
+			}
 			$schema = new \ReflectionClass($this->schemaclass);
 			$methods = $schema->getMethods(\ReflectionMethod::IS_STATIC);
 			$tables = [];
@@ -391,8 +401,10 @@ abstract class DbDriver implements DbDriverInterface {
 			foreach ($tables as $table) {
 				if (strpos($table, ':') === false || strpos($table, 'core:') === 0) {
 					// Core tables.
-					$schemaclass = $this->schemaclass;
-					$ret[$table] = $schemaclass::$table();
+					if (!empty($this->schemaclass)) {
+						$schemaclass = $this->schemaclass;
+						$ret[$table] = $schemaclass::$table();
+					}
 				} else {
 					// Plugin tables.
 					$tableparts = explode(':', $table, 2);
@@ -746,7 +758,7 @@ abstract class DbDriver implements DbDriverInterface {
 		$params = [];
 		foreach ($record as $column => $value) {
 			$columns[] = $this->quote_column($column);
-			$params[] = $this->cast_val($value, $table, $column);
+			$params[] = $this->cast_val_for_column($value, $table, $column);
 		}
 
 		$ignore = ($ignore === true) ? ' IGNORE' : '';
@@ -789,8 +801,8 @@ abstract class DbDriver implements DbDriverInterface {
 
 			$rowsplaceholders[] = $rowplaceholders;
 
-			foreach ($row as $i => $value) {
-				$params[] = $this->cast_val($value, $table, $columns[$i]);
+			foreach ($row as $j => $value) {
+				$params[] = $this->cast_val_for_column($value, $table, $columns[$j]);
 			}
 		}
 
@@ -843,7 +855,7 @@ abstract class DbDriver implements DbDriverInterface {
 			$this->validate_columns($table, $toupdate);
 			foreach ($toupdate as $column => $value) {
 				$updatedata[] = $this->quote_column($column).' = ?';
-				$params[] = $this->cast_val($value, $table, $column);
+				$params[] = $this->cast_val_for_column($value, $table, $column);
 			}
 			$updatedata = implode(',', $updatedata);
 
@@ -880,7 +892,7 @@ abstract class DbDriver implements DbDriverInterface {
 			$this->validate_columns($table, $updated);
 			foreach ($updated as $column => $value) {
 				$updatedata[] = $this->quote_column($column).' = ?';
-				$params[] = $this->cast_val($value, $table, $column);
+				$params[] = $this->cast_val_for_column($value, $table, $column);
 			}
 			$updatedata = implode(',', $updatedata);
 
@@ -1094,34 +1106,29 @@ abstract class DbDriver implements DbDriverInterface {
 		$params = [];
 		$schema = $this->get_table_schema($table);
 
-		foreach ($filters as $key => $val) {
+		foreach ($filters as $column => $val) {
 			// Numeric keys allow us to add raw where conditions.
-			if (is_numeric($key) && is_string($val)) {
+			if (is_numeric($column) && is_string($val)) {
 				$where[] = $val;
 				continue;
 			}
 
-			if (!($val instanceof DataFilter)) {
-				$datatype = $this->get_column_datatype($table, $key);
-				$filter = new DataFilter($key, $datatype, $val);
-			} else {
-				$filter = $val;
-			}
+			$columndatatype = $this->get_column_datatype($table, $column);
+			$filter = ($val instanceof DataFilter) ? $val : new DataFilter($column, $columndatatype, $val);
 
-			if (!isset($schema[$table]['columns'][$filter->field])) {
+			if (!empty($schema) && !isset($schema[$table]['columns'][$filter->field])) {
 				throw new Exception('Bad filter encountered', static::ERR_DB_BAD_REQUEST);
 			}
 
-
 			if (is_array($filter->data)) {
-				// If we have an array for value, it's transformed into a search for any the values.
+				// If we have an array for value, it's transformed into a search for any of the values.
 
 				if (empty($filter->data)) {
 					throw new Exception('Empty values received for db filter', static::ERR_DB_BAD_REQUEST);
 				}
 
-				$this_data_dbparams = [];
-
+				// Validate values.
+				$filterparams = [];
 				foreach ($filter->data as $val) {
 					if ($this->validate_value($filter->datatype, $val) !== true) {
 						$msg = 'Data passed to database was not valid. <br />';
@@ -1131,12 +1138,11 @@ abstract class DbDriver implements DbDriverInterface {
 						$msg .= 'Field: '.$filter->field;
 						throw new Exception($msg, static::ERR_DB_BAD_REQUEST);
 					}
-
-					$this_data_dbparams[] = $this->cast_val($val, $table, $key);
+					$filterparams[] = $this->cast_val($val, $columndatatype);
 				}
 
 				$where[] .= $this->quote_column($filter->field).' IN ('.implode(',', array_fill(0, count($filter->data), '?')).')';
-				$params = array_merge($params, $this_data_dbparams);
+				$params = array_merge($params, $filterparams);
 			} else {
 				if ($this->validate_value($filter->datatype, $filter->data) !== true && $filter->data !== '""') {
 					$msg = 'Data passed to database was not valid. <br />';
@@ -1148,15 +1154,15 @@ abstract class DbDriver implements DbDriverInterface {
 				}
 
 				// Assemble the SQL for this filter.
-				$this_where = $this->quote_column($filter->field).' '.$filter->operator.' ';
+				$filtersql = $this->quote_column($filter->field).' '.$filter->operator.' ';
 				if ($filter->data === '""') {
 					// If the data is "", we're comparing against empty strings.
-					$this_where .= '""';
+					$filtersql .= '""';
 				} else {
-					$this_where .= '?';
-					$params[] = $this->cast_val($filter->data, $table, $key);
+					$filtersql .= '?';
+					$params[] = $this->cast_val($filter->data, $columndatatype);
 				}
-				$where[] = $this_where;
+				$where[] = $filtersql;
 			}
 		}
 
@@ -1201,9 +1207,13 @@ abstract class DbDriver implements DbDriverInterface {
 	 * @return string A datatype.
 	 */
 	public function get_column_datatype($table, $column) {
-		$schema = $this->get_table_schema($table);
-		$schema = $schema[$table];
-		return (isset($schema['columns'][$column])) ? $schema['columns'][$column] : false;
+		if (!empty($this->schemaclass)) {
+			$schema = $this->get_table_schema($table);
+			$schema = $schema[$table];
+			return (isset($schema['columns'][$column])) ? $schema['columns'][$column] : false;
+		} else {
+			return 'str';
+		}
 	}
 
 	/**

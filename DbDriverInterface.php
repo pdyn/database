@@ -122,14 +122,23 @@ interface DbDriverInterface {
 	public function get_prefix();
 
 	/**
-	 * Transform a value into a storage representation. Optionally based on table/column schema.
+	 * Transform a value into a storable representation.
+	 *
+	 * @param mixed $val A value to transform.
+	 * @param string $datatype The datatype of the value.
+	 * @return string|int|float The transformed value.
+	 */
+	public function cast_val($val, $datatype);
+
+	/**
+	 * Transform a value into a storage representation based on it's table and column.
 	 *
 	 * @param mixed $val A value to transform.
 	 * @param string $table A table to look up to transform against schema.
 	 * @param string $column A column to look up to transform against schema.
 	 * @return string|int|float The transformed value.
 	 */
-	public function cast_val($val, $table = '', $column = '');
+	public function cast_val_for_column($value, $table, $column);
 
 	/**
 	 * Get a list of tables in the database.

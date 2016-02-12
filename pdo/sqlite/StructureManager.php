@@ -156,7 +156,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		foreach ($recs as $rec) {
 			foreach ($rec as $key => $val) {
 				$key = ($key === $oldname) ? $column : $key;
-				$rec[$key] = $this->dbdriver->cast_val($val, $table, $key);
+				$rec[$key] = $this->dbdriver->cast_val_for_column($val, $table, $key);
 			}
 			unset($rec[$oldname]);
 			$this->dbdriver->insert_record($table, $rec, false, false);
@@ -266,7 +266,7 @@ class StructureManager implements \pdyn\database\StructureManagerInterface {
 		$recs = $this->dbdriver->get_records($tmptablename);
 		foreach ($recs as $rec) {
 			foreach ($rec as $key => $val) {
-				$rec[$key] = $this->dbdriver->cast_val($val, $table, $key);
+				$rec[$key] = $this->dbdriver->cast_val_for_column($val, $table, $key);
 			}
 			$this->dbdriver->insert_record($table, $rec, false, false);
 		}
