@@ -305,6 +305,8 @@ abstract class DbDriver implements DbDriverInterface {
 		if (!empty($prefix) && (is_string($prefix) || is_numeric($prefix))) {
 			$this->prefix = preg_replace('#[^A-Za-z0-9-_]#', '', $prefix);
 			return true;
+		} elseif (empty($prefix) && is_string($prefix)) {
+			$this->prefix = '';
 		} else {
 			return false;
 		}

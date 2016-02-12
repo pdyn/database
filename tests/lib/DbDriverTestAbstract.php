@@ -104,7 +104,7 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 			[true, false, static::DBPREFIX],
 			[false, false, static::DBPREFIX],
 			[null, false, static::DBPREFIX],
-			['', false, static::DBPREFIX],
+			['', false, ''],
 			[[], false, static::DBPREFIX],
 			['te!@#$%^&*()+={}[]:;\'"<>,.?/`~st', true, 'test'],
 			['te-_1st', true, 'te-_1st'],
