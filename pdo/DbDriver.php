@@ -83,7 +83,7 @@ abstract class DbDriver extends \pdyn\database\DbDriver {
 		if (empty($params)) {
 			$stmt = $this->link->query($sql);
 		} else {
-			$stmt = $this->link->prepare($sql, array(\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY));
+			$stmt = $this->link->prepare($sql, [\PDO::ATTR_CURSOR => \PDO::CURSOR_FWDONLY]);
 			if (!empty($stmt)) {
 				$stmt->execute($params);
 
@@ -92,7 +92,7 @@ abstract class DbDriver extends \pdyn\database\DbDriver {
 					throw new \Exception($errinfo[2], static::ERR_DB_BAD_REQUEST);
 				}
 
-				if (in_array($querytype, array('INSERT', 'UPDATE', 'DELETE'), true)) {
+				if (in_array($querytype, ['INSERT', 'UPDATE', 'DELETE'], true)) {
 					$affected_rows = $stmt->rowCount();
 				}
 			}
@@ -106,10 +106,10 @@ abstract class DbDriver extends \pdyn\database\DbDriver {
 		$this->numqueries++;
 		$this->laststmt = $stmt;
 		$lastid = $this->link->lastInsertId();
-		$ar = array(
+		$ar = [
 			'affected_rows' => (isset($affected_rows)) ? $affected_rows	: -1,
 			'last_id' => ($querytype === 'INSERT' && !empty($lastid)) ? $lastid : 0
-		);
+		];
 		return $ar;
 	}
 

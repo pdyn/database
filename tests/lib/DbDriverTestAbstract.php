@@ -399,34 +399,34 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 		$this->assertEquals([$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]], $records);
 
 		// Test filters.
-		$records = $this->DB->get_records('simplekv', array('key' => 'testkey1'));
-		$this->assertEquals(array($testrecs[1], $testrecs[2]), $records);
-		$records = $this->DB->get_records('simplekv', array('key' => 'testkey1', 'value' => 'testvalue2'));
-		$this->assertEquals(array($testrecs[2]), $records);
+		$records = $this->DB->get_records('simplekv', ['key' => 'testkey1']);
+		$this->assertEquals([$testrecs[1], $testrecs[2]], $records);
+		$records = $this->DB->get_records('simplekv', ['key' => 'testkey1', 'value' => 'testvalue2']);
+		$this->assertEquals([$testrecs[2]], $records);
 
 		// Test sort.
-		$records = $this->DB->get_records('simplekv', array(), array('id' => 'DESC'));
-		$this->assertEquals(array($testrecs[4], $testrecs[3], $testrecs[2], $testrecs[1]), $records);
-		$records = $this->DB->get_records('simplekv', array(), array('id' => 'ASC'));
-		$this->assertEquals(array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]), $records);
-		$records = $this->DB->get_records('simplekv', array(), array('key' => 'ASC', 'value' => 'DESC'));
-		$this->assertEquals(array($testrecs[2], $testrecs[1], $testrecs[3], $testrecs[4]), $records);
+		$records = $this->DB->get_records('simplekv', [], ['id' => 'DESC']);
+		$this->assertEquals([$testrecs[4], $testrecs[3], $testrecs[2], $testrecs[1]], $records);
+		$records = $this->DB->get_records('simplekv', [], ['id' => 'ASC']);
+		$this->assertEquals([$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]], $records);
+		$records = $this->DB->get_records('simplekv', [], ['key' => 'ASC', 'value' => 'DESC']);
+		$this->assertEquals([$testrecs[2], $testrecs[1], $testrecs[3], $testrecs[4]], $records);
 
 		// Test filters and sort.
-		$records = $this->DB->get_records('simplekv', array('key' => 'testkey1'), array('value' => 'DESC'));
-		$this->assertEquals(array($testrecs[2], $testrecs[1]), $records);
+		$records = $this->DB->get_records('simplekv', ['key' => 'testkey1'], ['value' => 'DESC']);
+		$this->assertEquals([$testrecs[2], $testrecs[1]], $records);
 
 		// Test ranges and limits.
-		$records = $this->DB->get_records('simplekv', array(), array('id' => 'ASC'), '*', 1);
-		$expected = array($testrecs[2], $testrecs[3], $testrecs[4]);
+		$records = $this->DB->get_records('simplekv', [], ['id' => 'ASC'], '*', 1);
+		$expected = [$testrecs[2], $testrecs[3], $testrecs[4]];
 		$this->assertEquals($expected, $records);
 
-		$records = $this->DB->get_records('simplekv', array(), array('id' => 'ASC'), '*', 0, 2);
-		$expected = array($testrecs[1], $testrecs[2]);
+		$records = $this->DB->get_records('simplekv', [], ['id' => 'ASC'], '*', 0, 2);
+		$expected = [$testrecs[1], $testrecs[2]];
 		$this->assertEquals($expected, $records);
 
-		$records = $this->DB->get_records('simplekv', array(), array('id' => 'ASC'), '*', 1, 2);
-		$expected = array($testrecs[2], $testrecs[3]);
+		$records = $this->DB->get_records('simplekv', [], ['id' => 'ASC'], '*', 1, 2);
+		$expected = [$testrecs[2], $testrecs[3]];
 		$this->assertEquals($expected, $records);
 	}
 
@@ -454,25 +454,25 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 
 		// Test no params.
 		$recordset = $this->DB->get_recordset('simplekv');
-		$this->assertRecordset(array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]), $recordset);
+		$this->assertRecordset([$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]], $recordset);
 
 		// Test filters.
-		$recordset = $this->DB->get_recordset('simplekv', array('key' => 'testkey1'));
-		$this->assertRecordset(array($testrecs[1], $testrecs[2]), $recordset);
-		$recordset = $this->DB->get_recordset('simplekv', array('key' => 'testkey1', 'value' => 'testvalue2'));
-		$this->assertRecordset(array($testrecs[2]), $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', ['key' => 'testkey1']);
+		$this->assertRecordset([$testrecs[1], $testrecs[2]], $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', ['key' => 'testkey1', 'value' => 'testvalue2']);
+		$this->assertRecordset([$testrecs[2]], $recordset);
 
 		// Test sort.
-		$recordset = $this->DB->get_recordset('simplekv', array(), array('id' => 'DESC'));
-		$this->assertRecordset(array($testrecs[4], $testrecs[3], $testrecs[2], $testrecs[1]), $recordset);
-		$recordset = $this->DB->get_recordset('simplekv', array(), array('id' => 'ASC'));
-		$this->assertRecordset(array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]), $recordset);
-		$recordset = $this->DB->get_recordset('simplekv', array(), array('key' => 'ASC', 'value' => 'DESC'));
-		$this->assertRecordset(array($testrecs[2], $testrecs[1], $testrecs[3], $testrecs[4]), $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', [], ['id' => 'DESC']);
+		$this->assertRecordset([$testrecs[4], $testrecs[3], $testrecs[2], $testrecs[1]], $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', [], ['id' => 'ASC']);
+		$this->assertRecordset([$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]], $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', [], ['key' => 'ASC', 'value' => 'DESC']);
+		$this->assertRecordset([$testrecs[2], $testrecs[1], $testrecs[3], $testrecs[4]], $recordset);
 
 		// Test filters and sort.
-		$recordset = $this->DB->get_recordset('simplekv', array('key' => 'testkey1'), array('value' => 'DESC'));
-		$this->assertRecordset(array($testrecs[2], $testrecs[1]), $recordset);
+		$recordset = $this->DB->get_recordset('simplekv', ['key' => 'testkey1'], ['value' => 'DESC']);
+		$this->assertRecordset([$testrecs[2], $testrecs[1]], $recordset);
 	}
 
 	/**
@@ -487,13 +487,13 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 		$num = $this->DB->count_records('simplekv');
 		$this->assertEquals(4, $num);
 
-		$num = $this->DB->count_records('simplekv', array('key' => 'testkey1'));
+		$num = $this->DB->count_records('simplekv', ['key' => 'testkey1']);
 		$this->assertEquals(2, $num);
 
-		$num = $this->DB->count_records('simplekv', array('key' => 'testkey2'));
+		$num = $this->DB->count_records('simplekv', ['key' => 'testkey2']);
 		$this->assertEquals(1, $num);
 
-		$num = $this->DB->count_records('simplekv', array('key' => 'testkey1', 'value' => 'testvalue2'));
+		$num = $this->DB->count_records('simplekv', ['key' => 'testkey1', 'value' => 'testvalue2']);
 		$this->assertEquals(1, $num);
 	}
 
@@ -502,28 +502,28 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 	 */
 	public function test_update_records() {
 		$testrecs = $this->create_test_records();
-		$expected = array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]);
+		$expected = [$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]];
 
 		// Test updating (1).
-		$this->DB->update_records('simplekv', array('value' => 'updated1'), array('key' => 'testkey1'));
+		$this->DB->update_records('simplekv', ['value' => 'updated1'], ['key' => 'testkey1']);
 		$expected[0]['value'] = 'updated1';
 		$expected[1]['value'] = 'updated1';
 		$rows = $this->DB->get_records('simplekv');
 		$this->assertEquals($expected, $rows);
 
 		// Test updating (2).
-		$this->DB->update_records('simplekv', array('value' => 'updated2'), array('key' => 'testkey2'));
+		$this->DB->update_records('simplekv', ['value' => 'updated2'], ['key' => 'testkey2']);
 		$expected[2]['value'] = 'updated2';
 		$rows = $this->DB->get_records('simplekv');
 		$this->assertEquals($expected, $rows);
 
 		// Test updating with a non-existant where condition.
-		$this->DB->update_records('simplekv', array('value' => 'updated3'), array('key' => 'nonexistent'));
+		$this->DB->update_records('simplekv', ['value' => 'updated3'], ['key' => 'nonexistent']);
 		$rows = $this->DB->get_records('simplekv');
 		$this->assertEquals($expected, $rows);
 
 		// Test updating all values.
-		$this->DB->update_records('simplekv', array('value' => 'allupdate'));
+		$this->DB->update_records('simplekv', ['value' => 'allupdate']);
 		$expected[0]['value'] = 'allupdate';
 		$expected[1]['value'] = 'allupdate';
 		$expected[2]['value'] = 'allupdate';
@@ -538,14 +538,14 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 	public function test_delete_records() {
 		$testrecs = $this->create_test_records();
 
-		$this->DB->delete_records('simplekv', array('key' => 'testkey2'));
+		$this->DB->delete_records('simplekv', ['key' => 'testkey2']);
 		$rows = $this->DB->get_records('simplekv');
-		$expected = array($testrecs[1], $testrecs[2], $testrecs[4]);
+		$expected = [$testrecs[1], $testrecs[2], $testrecs[4]];
 		$this->assertEquals($expected, $rows);
 
-		$this->DB->delete_records('simplekv', array('key' => 'testkey1'));
+		$this->DB->delete_records('simplekv', ['key' => 'testkey1']);
 		$rows = $this->DB->get_records('simplekv');
-		$expected = array($testrecs[4]);
+		$expected = [$testrecs[4]];
 		$this->assertEquals($expected, $rows);
 
 		$this->DB->delete_records('simplekv');
@@ -570,7 +570,7 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 
 		// Test invalid query w/ params.
 		try {
-			$this->DB->query('abcdefg', array('test'));
+			$this->DB->query('abcdefg', ['test']);
 			$this->assertTrue(false);
 		} catch (\Exception $e) {
 			$this->assertEquals(\pdyn\database\DbDriver::ERR_DB_BAD_REQUEST, $e->getCode());
@@ -598,7 +598,7 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 		// Test w/ no params.
 		$this->DB->query('SELECT * FROM {simplekv} ORDER BY id ASC');
 		$recs = $this->DB->fetch_arrayset();
-		$expected = array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]);
+		$expected = [$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]];
 		$this->assertEquals($expected, $recs);
 
 		$this->DB->query('SELECT * FROM {simplekv} ORDER BY id ASC');
@@ -607,48 +607,48 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 
 		$this->DB->query('SELECT * FROM {simplekv} ORDER BY id ASC');
 		$recs = $this->DB->fetch_arrayset('idsorted', 'key');
-		$expected = array(
-			'testkey1' => array(
+		$expected = [
+			'testkey1' => [
 				$testrecs[1],
 				$testrecs[2],
-			),
-			'testkey2' => array(
+			],
+			'testkey2' => [
 				$testrecs[3]
-			),
-			'testkey3' => array(
+			],
+			'testkey3' => [
 				$testrecs[4]
-			),
-		);
+			],
+		];
 		$this->assertEquals($expected, $recs);
 
 		// Test w/ params.
-		$this->DB->query('SELECT * FROM {simplekv} WHERE `key` = ? ORDER BY id ASC', array('testkey1'));
+		$this->DB->query('SELECT * FROM {simplekv} WHERE `key` = ? ORDER BY id ASC', ['testkey1']);
 		$recs = $this->DB->fetch_arrayset();
-		$expected = array($testrecs[1], $testrecs[2]);
+		$expected = [$testrecs[1], $testrecs[2]];
 		$this->assertEquals($expected, $recs);
 
-		$this->DB->query('SELECT * FROM {simplekv} WHERE `key` = ? ORDER BY id ASC', array('testkey1'));
+		$this->DB->query('SELECT * FROM {simplekv} WHERE `key` = ? ORDER BY id ASC', ['testkey1']);
 		$recs = $this->DB->fetch_arrayset('idindexed', 'id');
-		$expected = array(1 => $testrecs[1], 2 => $testrecs[2]);
+		$expected = [1 => $testrecs[1], 2 => $testrecs[2]];
 		$this->assertEquals($expected, $recs);
 
 		$this->DB->query(
 			'SELECT * FROM {simplekv} WHERE `key` = ? OR `key` = ? OR `key` = ? ORDER BY id ASC',
-			array('testkey1', 'testkey2', 'testkey3')
+			['testkey1', 'testkey2', 'testkey3']
 		);
 		$recs = $this->DB->fetch_arrayset('idsorted', 'key');
-		$expected = array(
-			'testkey1' => array(
+		$expected = [
+			'testkey1' => [
 				$testrecs[1],
 				$testrecs[2],
-			),
-			'testkey2' => array(
+			],
+			'testkey2' => [
 				$testrecs[3]
-			),
-			'testkey3' => array(
+			],
+			'testkey3' => [
 				$testrecs[4]
-			),
-		);
+			],
+		];
 		$this->assertEquals($expected, $recs);
 	}
 
@@ -660,7 +660,7 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 
 		$this->DB->query('SELECT * FROM {simplekv}');
 		$recordset = $this->DB->fetch_recordset();
-		$expected = array($testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]);
+		$expected = [$testrecs[1], $testrecs[2], $testrecs[3], $testrecs[4]];
 		$this->assertRecordset($expected, $recordset);
 	}
 }

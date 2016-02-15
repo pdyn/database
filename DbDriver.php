@@ -394,7 +394,7 @@ abstract class DbDriver implements DbDriverInterface {
 			$tables = $this->get_tables();
 		}
 		if (is_string($tables)) {
-			$tables = array($tables);
+			$tables = [$tables];
 		}
 
 		if (is_array($tables)) {
@@ -539,23 +539,23 @@ abstract class DbDriver implements DbDriverInterface {
 	 *                        idindexed: Return is usually a numeric array of records. If idindexed is specified, use the value
 	 *                                   from the specified field is used as the index for each returned record in the array.
 	 *                                   Ex.
-	 *                                   array(
-	 *                                       'val1' => array('id' => 1, 'somefield' => 'val1'),
-	 *                                       'val2' => array('id' => 2, 'somefield' => 'val2'),
-	 *                                   )
+	 *                                   [
+	 *                                       'val1' => ['id' => 1, 'somefield' => 'val1'],
+	 *                                       'val2' => ['id' => 2, 'somefield' => 'val2'],
+	 *                                   ]
 	 *                        idsorted: Instead of a numeric array of arrays, return an array with keys being the values of the
 	 *                                  field specified, and values being the records that contain the value for that field.
 	 *                                  Ex.
-	 *                                  array(
-	 *                                      'val1' => array(
-	 *                                          array('id' => 1, 'somefield' => 'val1'),
-	 *                                          array('id' => 2, 'somefield' => 'val1'),
-	 *                                      ),
-	 *                                      'val2' => array(
-	 *                                          array('id' => 3, 'somefield' => 'val2'),
-	 *                                          array('id' => 4, 'somefield' => 'val2'),
-	 *                                      ),
-	 *                                  )
+	 *                                  [
+	 *                                      'val1' => [
+	 *                                          ['id' => 1, 'somefield' => 'val1'],
+	 *                                          ['id' => 2, 'somefield' => 'val1'],
+	 *                                      ],
+	 *                                      'val2' => [
+	 *                                          ['id' => 3, 'somefield' => 'val2'],
+	 *                                          ['id' => 4, 'somefield' => 'val2'],
+	 *                                      ],
+	 *                                  ]
 	 * @return array An array of all found records. If none found, will be an empty array.
 	 */
 	public function get_records($table, array $conditions = array(), array $order = array(), $columns = '*', $start = 0,
@@ -813,10 +813,10 @@ abstract class DbDriver implements DbDriverInterface {
 		$stmt = $this->query($sql, $params);
 		$this->unlock_tables();
 
-		return array(
+		return [
 			'affected_rows' => $stmt['affected_rows'],
 			'last_id' => $stmt['last_id']
-		);
+		];
 	}
 
 	/**
@@ -1022,7 +1022,7 @@ abstract class DbDriver implements DbDriverInterface {
 		// Record limiting.
 		$sql .= $this->generate_limit_clause($start, $count);
 
-		return array($sql, $params);
+		return [$sql, $params];
 	}
 
 	/**
@@ -1040,7 +1040,7 @@ abstract class DbDriver implements DbDriverInterface {
 					// If we have an auto-assigned it, it's a manual sort entry. Add the value.
 					$orderby[] = $dir;
 				} else {
-					if (in_array(mb_strtolower($dir), array('asc', 'desc'))) {
+					if (in_array(mb_strtolower($dir), ['asc', 'desc'])) {
 						$orderby[] = $this->quote_column($field).' '.strtoupper($dir);
 					}
 				}
@@ -1166,7 +1166,7 @@ abstract class DbDriver implements DbDriverInterface {
 			}
 		}
 
-		return array($where, $params);
+		return [$where, $params];
 	}
 
 	/**
