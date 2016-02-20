@@ -51,9 +51,9 @@ interface DbDriverInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $schema The fully-qualified classname of a database schema class.
+	 * @param array $schema Array of fully-qualified classnames of database schema classes.
 	 */
-	public function __construct($schema);
+	public function __construct(array $schema = array());
 
 	/**
 	 * Set the logger to be used with the driver.
@@ -101,10 +101,10 @@ interface DbDriverInterface {
 	/**
 	 * Set database schema.
 	 *
-	 * @param \pdyn\database\DbSchema $schema The class name of a database schema to set.
+	 * @param array $schema Array of classnames extending \pdyn\database\DbSchema.
 	 * @return bool Success/Failure.
 	 */
-	public function set_schema($schema);
+	public function set_schema(array $schema);
 
 	/**
 	 * Set table prefix.
@@ -143,10 +143,9 @@ interface DbDriverInterface {
 	/**
 	 * Get a list of tables in the database.
 	 *
-	 * @param bool $schema Whether to use the supplied schema (if true), or whether to query the database (if false)
 	 * @return array Array of tables (without prefix)
 	 */
-	public function get_tables($schema = true);
+	public function get_tables();
 
 	/**
 	 * Get a table's schema.

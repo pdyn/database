@@ -37,7 +37,7 @@ class StructureManagerTest extends \pdyn\database\tests\lib\StructureManagerTest
 	 * @return \pdyn\database\pdo\sqlite\DbDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		$DB = new \pdyn\database\pdo\sqlite\DbDriver('\pdyn\database\tests\lib\DbTestSchema');
+		$DB = new \pdyn\database\pdo\sqlite\DbDriver(['\pdyn\database\tests\lib\DbTestSchema']);
 		$dsn = 'sqlite::memory:';
 		$DB->connect($dsn);
 		$DB->set_prefix(static::DBPREFIX);

@@ -44,7 +44,7 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 	 * @return \pdyn\database\pdo\sqlite\tests\MockDriver The mock database driver.
 	 */
 	public function construct_driver() {
-		$DB = new MockDriver('\pdyn\database\tests\lib\DbTestSchema');
+		$DB = new MockDriver(['\pdyn\database\tests\lib\DbTestSchema']);
 		$dsn = 'sqlite::memory:';
 		$DB->connect($dsn);
 		$DB->set_prefix(static::DBPREFIX);

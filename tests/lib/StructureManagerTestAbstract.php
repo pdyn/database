@@ -89,9 +89,9 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 	 */
 	public function clean_database() {
 		$this->DB->set_prefix(static::DBPREFIX);
-		$tables = $this->DB->get_tables();
-		foreach ($tables as $table) {
-			$this->DB->query('DROP TABLE IF EXISTS {'.$table.'}');
+		$tables = $this->DB->get_schema();
+		foreach ($tables as $tablename => $tableschema) {
+			$this->DB->query('DROP TABLE IF EXISTS {'.$tablename.'}');
 		}
 	}
 
@@ -101,18 +101,18 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 	public function test_create_drop_table() {
 		// Assert Starting State.
 		$expected_starting_tables = array('simplekv', 'config');
-		$starting_tables = $this->DB->get_tables(false);
+		$starting_tables = $this->DB->get_tables();
 		$this->assertEquals(sort($expected_starting_tables), sort($starting_tables));
 
 		// Create Table.
 		$this->DB->structure()->create_table('testtable');
-		$tables_post_create = $this->DB->get_tables(false);
+		$tables_post_create = $this->DB->get_tables();
 		$expected_tables_post_create = array('simplekv', 'config', 'testtable');
 		$this->assertEquals(sort($expected_tables_post_create), sort($tables_post_create));
 
 		// Drop table.
 		$this->DB->structure()->drop_table('testtable');
-		$tables_post_drop = $this->DB->get_tables(false);
+		$tables_post_drop = $this->DB->get_tables();
 		$expected_tables_post_drop = array('simplekv', 'config');
 		$this->assertEquals(sort($expected_tables_post_drop), sort($tables_post_drop));
 	}
@@ -124,7 +124,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		// Setup.
 		$this->DB->structure()->create_table('testtable');
 		$this->DB->insert_record('testtable', array('value' => 'testvalue', 'col1' => '2', 'col2' => '3'));
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema2');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema2']);
 
 		// Perform.
 		$this->DB->structure()->rename_column('testtable', 'col1', 'newcol1');
@@ -137,7 +137,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		$this->assertEquals($expected, $records);
 
 		// Reset.
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema']);
 		$this->DB->structure()->drop_table('testtable');
 	}
 
@@ -148,7 +148,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		// Setup.
 		$this->DB->structure()->create_table('testtable');
 		$this->DB->insert_record('testtable', array('value' => 'testvalue', 'col1' => '2', 'col2' => '3'));
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema2');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema2']);
 
 		// Test non-existant column
 		try {
@@ -168,7 +168,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		$this->assertEquals($expected, $records);
 
 		// Reset.
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema']);
 		$this->DB->structure()->drop_table('testtable');
 	}
 
@@ -179,7 +179,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		// Setup.
 		$this->DB->structure()->create_table('testtable');
 		$this->DB->insert_record('testtable', array('value' => 'testvalue', 'col1' => '2', 'col2' => '3'));
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema2');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema2']);
 
 		// Test non-existant column.
 		/*
@@ -201,7 +201,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		$this->assertEquals($expected, $records);
 
 		// Reset.
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema']);
 		$this->DB->structure()->drop_table('testtable');
 	}
 
@@ -211,7 +211,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 	public function test_add_index() {
 		// Setup.
 		$this->DB->structure()->create_table('testtable');
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema2');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema2']);
 
 		// Perform.
 		try {
@@ -229,7 +229,7 @@ abstract class StructureManagerTestAbstract extends \PHPUnit_Framework_TestCase 
 		}
 
 		// Reset.
-		$this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema');
+		$this->DB->set_schema(['\pdyn\database\tests\lib\DbTestSchema']);
 		$this->DB->structure()->drop_table('testtable');
 	}
 }

@@ -47,23 +47,18 @@ class DbDriver extends \pdyn\database\pdo\DbDriver {
 	/**
 	 * Get a list of tables in the database.
 	 *
-	 * @param bool $schema Whether to use the supplied schema (if true), or whether to query the database (if false)
 	 * @return array Array of tables (without prefix)
 	 */
-	public function get_tables($schema = true) {
-		if ($schema === false) {
-			$tables_raw = $this->get_recordset_sql('SELECT * FROM sqlite_master WHERE type="table"');
-			$tables = [];
-			foreach ($tables_raw as $row) {
-				$table = $row['name'];
-				if (mb_strpos($table, $this->prefix) === 0) {
-					$tables[] = mb_substr($table, mb_strlen($this->prefix));
-				}
+	public function get_tables() {
+		$tables_raw = $this->get_recordset_sql('SELECT * FROM sqlite_master WHERE type="table"');
+		$tables = [];
+		foreach ($tables_raw as $row) {
+			$table = $row['name'];
+			if (mb_strpos($table, $this->prefix) === 0) {
+				$tables[] = mb_substr($table, mb_strlen($this->prefix));
 			}
-			return $tables;
-		} else {
-			return parent::get_tables(true);
 		}
+		return $tables;
 	}
 
 	/**

@@ -34,8 +34,8 @@ abstract class DbDriver implements DbDriverInterface {
 	/** @var bool Whether we are connected to the database or not. */
 	public $connected = false;
 
-	/** @var string The classname of the database schema to use. */
-	protected $schemaclass = null;
+	/** @var array Array of database schema information. */
+	protected $schema = [];
 
 	/** @var string A prefix to add to all tables. */
 	protected $prefix = 'pdyn_';
@@ -67,11 +67,11 @@ abstract class DbDriver implements DbDriverInterface {
 	/**
 	 * Constructor.
 	 *
-	 * @param string $schema The fully-qualified classname of a database schema class.
+	 * @param array $schema Array of fully-qualified classnames of database schema classes.
 	 */
-	public function __construct($schema = null) {
+	public function __construct(array $schema = array()) {
 		if (!empty($schema)) {
-			$this->schemaclass = $schema;
+			$this->set_schema($schema);
 		}
 
 		static::$instance =& $this;
@@ -277,7 +277,7 @@ abstract class DbDriver implements DbDriverInterface {
 		try {
 			$args = func_get_args();
 			$class = get_called_class();
-			$DB = new $class('db_schema');
+			$DB = new $class();
 			$callable = [$DB, 'connect'];
 			call_user_func_array($callable, $args);
 		} catch (\Exception $e) {
@@ -290,16 +290,34 @@ abstract class DbDriver implements DbDriverInterface {
 	/**
 	 * Set database schema.
 	 *
-	 * @param \pdyn\database\DbSchema $schema The class name of a database schema to set.
+	 * @param array $schema Array of classnames extending \pdyn\database\DbSchema.
 	 * @return bool Success/Failure.
 	 */
-	public function set_schema($schema) {
-		if (is_string($schema) && class_exists($schema)) {
-			$this->schemaclass = $schema;
-			return true;
-		} else {
-			return false;
+	public function set_schema(array $schema) {
+		$this->schema = [];
+		foreach ($schema as $schemaclass) {
+			if (empty($schemaclass) || !class_exists($schemaclass)) {
+				$errmsg = 'Schema class "'.$schemaclass.'" does not exist.';
+				throw new Exception($errmsg, Exception::ERR_INTERNAL_ERROR);
+			}
+			if (!is_subclass_of($schemaclass, '\pdyn\database\DbSchema', true)) {
+				$errmsg = 'Schema class "'.$schemaclass.'" does not extend \pdyn\database\DbSchema.';
+				throw new Exception($errmsg, Exception::ERR_INTERNAL_ERROR);
+			}
+			$tables = $schemaclass::get_all();
+			foreach ($tables as $table) {
+				$this->schema[$table] = $schemaclass::$table();
+			}
 		}
+	}
+
+	/**
+	 * Get the set schema.
+	 *
+	 * @return array The set schema.
+	 */
+	public function get_schema() {
+		return $this->schema;
 	}
 
 	/**
@@ -331,32 +349,16 @@ abstract class DbDriver implements DbDriverInterface {
 	/**
 	 * Get a list of tables in the database.
 	 *
-	 * @param bool $schema Whether to use the supplied schema (if true), or whether to query the database (if false)
 	 * @return array Array of tables (without prefix)
 	 */
-	public function get_tables($schema = true) {
-		if ($schema === false) {
-			$this->query('SHOW TABLES');
-			$tables_raw = $this->fetch_arrayset();
-			$tables = [];
-			foreach ($tables_raw as $row) {
-				$table = current($row);
-				if (mb_strpos($table, $this->prefix) === 0) {
-					$tables[] = mb_substr($table, mb_strlen($this->prefix));
-				}
-			}
-			return $tables;
-		} else {
-			if (empty($this->schemaclass)) {
-				throw new \Exception('No schema set');
-			}
-			$schema = new \ReflectionClass($this->schemaclass);
-			$methods = $schema->getMethods(\ReflectionMethod::IS_STATIC);
-			$tables = [];
-			foreach ($methods as $method) {
-				if ($method->name{0} !== '_' && $method->name !== 'get_all') {
-					$tables[] = $method->name;
-				}
+	public function get_tables() {
+		$this->query('SHOW TABLES');
+		$tables_raw = $this->fetch_arrayset();
+		$tables = [];
+		foreach ($tables_raw as $row) {
+			$table = current($row);
+			if (mb_strpos($table, $this->prefix) === 0) {
+				$tables[] = mb_substr($table, mb_strlen($this->prefix));
 			}
 		}
 		return $tables;
@@ -391,7 +393,8 @@ abstract class DbDriver implements DbDriverInterface {
 		$ret = [];
 
 		if ($tables === '*') {
-			$tables = $this->get_tables();
+			$tables = $this->get_schema();
+			$tables = array_keys($tables);
 		}
 		if (is_string($tables)) {
 			$tables = [$tables];
@@ -401,9 +404,8 @@ abstract class DbDriver implements DbDriverInterface {
 			foreach ($tables as $table) {
 				if (strpos($table, ':') === false || strpos($table, 'core:') === 0) {
 					// Core tables.
-					if (!empty($this->schemaclass)) {
-						$schemaclass = $this->schemaclass;
-						$ret[$table] = $schemaclass::$table();
+					if (isset($this->schema[$table])) {
+						$ret[$table] = $this->schema[$table];
 					}
 				} else {
 					// Plugin tables.
@@ -1191,6 +1193,9 @@ abstract class DbDriver implements DbDriverInterface {
 	 */
 	protected function validate_columns($table, $record) {
 		$schema = $this->get_table_schema($table);
+		if (!isset($schema[$table])) {
+			throw new Exception('Table not found in schema.', Exception::ERR_RESOURCE_NOT_FOUND);
+		}
 		$diff = array_diff_key($record, $schema[$table]['columns']);
 		if (!empty($diff)) {
 			$msg = 'Received invalid record for "'.$table.'". Invalid columns: '.implode(', ', array_keys($diff));
@@ -1207,10 +1212,13 @@ abstract class DbDriver implements DbDriverInterface {
 	 * @return string A datatype.
 	 */
 	public function get_column_datatype($table, $column) {
-		if (!empty($this->schemaclass)) {
+		if (!empty($this->schema)) {
 			$schema = $this->get_table_schema($table);
+			if (!isset($schema[$table])) {
+				throw new Exception('Table not found in schema.', Exception::ERR_RESOURCE_NOT_FOUND);
+			}
 			$schema = $schema[$table];
-			return (isset($schema['columns'][$column])) ? $schema['columns'][$column] : false;
+			return (isset($schema['columns'][$column])) ? $schema['columns'][$column] : 'str';
 		} else {
 			return 'str';
 		}

@@ -49,7 +49,7 @@ class DbDriverTest extends \pdyn\database\tests\lib\DbDriverTestAbstract {
 			$this->markTestSkipped('Not using MySQL driver');
 			return false;
 		}
-		$DB = new MockDriver('\pdyn\database\tests\lib\DbTestSchema');
+		$DB = new MockDriver(['\pdyn\database\tests\lib\DbTestSchema']);
 		$dsn = 'mysql:host='.PDYN_DATABASE_HOST.';dbname='.PDYN_DATABASE_DATABASE;
 		$DB->connect($dsn, PDYN_DATABASE_USER, PDYN_DATABASE_PASSWORD);
 		$DB->set_prefix(static::DBPREFIX);

@@ -29,17 +29,7 @@ use \pdyn\base\Exception;
  *
  * @codeCoverageIgnore
  */
-class DbTestSchema2 {
-	/**
-	 * Magic method to throw an exception if there is no schema for a requested table.
-	 *
-	 * @param string $name The called method name.
-	 * @param array $args Array of arguments.
-	 */
-	public static function __callStatic($name, $args) {
-		throw new Exception($name.' is not defined in database schema.', Exception::ERR_INTERNAL_ERROR);
-	}
-
+class DbTestSchema2 extends \pdyn\database\DbSchema {
 	public static function testtable() {
 		return [
 			'columns' => [

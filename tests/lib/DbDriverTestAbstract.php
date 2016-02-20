@@ -88,9 +88,9 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 	 */
 	public function clean_database() {
 		$this->DB->set_prefix(static::DBPREFIX);
-		$tables = $this->DB->get_tables();
-		foreach ($tables as $table) {
-			$this->DB->query('DROP TABLE IF EXISTS {'.$table.'}');
+		$tables = $this->DB->get_schema();
+		foreach ($tables as $tablename => $tableschema) {
+			$this->DB->query('DROP TABLE IF EXISTS {'.$tablename.'}');
 		}
 	}
 
@@ -126,12 +126,12 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 	}
 
 	/**
-	 * Test $DB->get_tables()
+	 * Test $DB->get_schema()
 	 */
-	public function test_get_tables() {
-		$actual_tables = $this->DB->get_tables();
-		$expected_tables = ['testtable', 'simplekv', 'config'];
-		$this->assertEquals($expected_tables, $actual_tables);
+	public function test_get_schema() {
+		$actual_tables = $this->DB->get_schema();
+		$expected = ['testtable', 'simplekv', 'config'];
+		$this->assertEquals($expected, array_keys($actual_tables));
 	}
 
 	/**
@@ -235,29 +235,6 @@ abstract class DbDriverTestAbstract extends \PHPUnit_Framework_TestCase {
 		// Test valid call.
 		$datatype = $this->DB->get_column_datatype('simplekv', 'key');
 		$this->assertEquals('str', $datatype);
-	}
-
-	/**
-	 * Test set_schema method.
-	 */
-	public function test_set_schema() {
-		$result = $this->DB->set_schema(true);
-		$this->assertFalse($result);
-
-		$result = $this->DB->set_schema(false);
-		$this->assertFalse($result);
-
-		$result = $this->DB->set_schema(null);
-		$this->assertFalse($result);
-
-		$result = $this->DB->set_schema('nonexistant');
-		$this->assertFalse($result);
-
-		$result = $this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema2');
-		$this->assertTrue($result);
-
-		$result = $this->DB->set_schema('\pdyn\database\tests\lib\DbTestSchema');
-		$this->assertTrue($result);
 	}
 
 	/**
